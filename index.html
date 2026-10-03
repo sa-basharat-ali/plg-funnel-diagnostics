@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Clay's Funnel, Diagnosed</title>
+<meta name="description" content="A data scientist's read of Clay's marketing and funnel, with a working model of where leads leak, who gets credit, and what a stunt really adds. By Syed Ahmed Basharat Ali.">
+<meta property="og:title" content="Clay's Funnel, Diagnosed">
+<meta property="og:description" content="Last-touch puts 58% of signups in 'direct' and gives agencies, community and events nothing. A working funnel model for the Marketing Analyst role.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Public+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#F6F6FA; --surface:#FFFFFF; --sunk:#ECECF4; --ink:#1A1930; --muted:#5E5C78; --line:#DCDBE8;
+  --violet:#5646D6; --violet-soft:#E9E6FC; --leak:#D9531E; --leak-soft:#FCE7DE; --ok:#1F8A5B;
+  --display:"Familjen Grotesk","Helvetica Neue",Arial,sans-serif; --body:"Public Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root{color-scheme:dark;
+  --bg:#0F0E1A; --surface:#171628; --sunk:#1E1D33; --ink:#E8E7F4; --muted:#A09EBB; --line:#2C2A45;
+  --violet:#9C90FF; --violet-soft:#25214A; --leak:#FF8A5C; --leak-soft:#3A1E14; --ok:#5DD39E;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.6}
+.wrap{max-width:1060px;margin:0 auto;padding-inline:20px;padding-block:calc(28px + env(safe-area-inset-top,0px)) calc(80px + env(safe-area-inset-bottom,0px))}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.08;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0 0 12px;max-width:66ch}
+a{color:var(--violet)}
+:focus-visible{outline:2px solid var(--violet);outline-offset:3px}
+.strip{display:flex;flex-wrap:wrap;gap:6px 22px;font-family:var(--mono);font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:12px}
+.strip b{color:var(--ink);font-weight:600}
+.hero{margin-top:40px}
+h1{font-size:clamp(38px,6vw,72px);font-weight:700;max-width:16ch}
+h1 span{color:var(--leak)}
+.lede{font-size:20px;color:var(--muted);margin-top:16px;max-width:58ch}
+.links{display:flex;gap:16px;flex-wrap:wrap;margin-top:18px;font-family:var(--mono);font-size:13.5px}
+
+/* assembly line */
+.line{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 18px 18px;overflow-x:auto}
+.stations{display:grid;grid-template-columns:repeat(6,minmax(132px,1fr));gap:0;min-width:820px;position:relative}
+.st{position:relative;padding:0 10px}
+.st::before{content:"";position:absolute;top:21px;left:0;right:0;height:4px;background:var(--violet)}
+.st:first-child::before{left:50%}.st:last-child::before{right:50%}
+.dot{position:relative;width:46px;height:46px;border-radius:50%;background:var(--surface);border:4px solid var(--violet);display:grid;place-items:center;font-family:var(--mono);font-weight:600;font-size:14px;margin:0 auto}
+.st h3{font-size:16px;text-align:center;margin-top:10px}
+.st .n{font-family:var(--mono);font-size:13px;text-align:center;color:var(--muted)}
+.drip{margin:10px auto 0;max-width:150px;border:1.5px solid var(--leak);background:var(--leak-soft);color:var(--ink);border-radius:8px;padding:7px 9px;font-size:12.5px;line-height:1.35}
+.drip b{display:block;font-family:var(--mono);color:var(--leak);font-size:14px}
+.line-cap{font-size:13px;color:var(--muted);margin-top:14px}
+
+section{margin-top:70px}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--violet);margin-bottom:6px}
+h2{font-size:clamp(28px,3.6vw,40px);font-weight:700;margin-bottom:16px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.fact b{display:block;font-family:var(--display);font-size:34px;font-weight:700;line-height:1}
+.fact span{font-size:14px;color:var(--muted)}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h3{font-size:19px;margin-bottom:6px}
+.card p{font-size:15px;color:var(--muted);margin:0}
+.card .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--violet);background:var(--violet-soft);border-radius:4px;padding:2px 7px;margin-bottom:8px}
+.tension{border-left:4px solid var(--leak);background:var(--surface);border-radius:0 12px 12px 0;padding:16px 18px;margin-top:14px}
+
+/* attribution switch */
+.attr{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.attr-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.seg{display:inline-flex;background:var(--sunk);border-radius:999px;padding:3px}
+.seg button{font:600 14px var(--body);border:0;background:transparent;color:var(--muted);padding:7px 14px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.ch{display:grid;grid-template-columns:150px minmax(0,1fr) 64px;gap:12px;align-items:center;padding:7px 0}
+.ch .nm{font-weight:600;font-size:15px}
+.track{height:18px;background:var(--sunk);border-radius:4px;position:relative;overflow:hidden}
+.fill{position:absolute;inset:0 auto 0 0;background:var(--violet);border-radius:4px}
+.ghost{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55}
+.val{font-family:var(--mono);font-size:14px;text-align:right;font-variant-numeric:tabular-nums}
+.attr-note{font-size:14px;color:var(--muted);margin-top:12px}
+
+/* findings */
+.find{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.f{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.f .num{font-family:var(--display);font-size:46px;font-weight:700;line-height:1;color:var(--leak);font-variant-numeric:tabular-nums}
+.f .num.good{color:var(--violet)}
+.f .num small{display:block;font-family:var(--body);font-size:13px;font-weight:600;color:var(--muted);margin-top:6px}
+.f h3{font-size:21px}
+.f p{font-size:15.5px;margin:0}
+.f .act{margin-top:auto;font-size:14.5px;border-top:1px dashed var(--line);padding-top:10px}
+.f .act b{color:var(--violet)}
+.cmp{display:grid;gap:6px}
+.cmp .r{display:grid;grid-template-columns:150px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:13.5px}
+.cmp .t{height:12px;background:var(--sunk);border-radius:3px;position:relative;overflow:hidden}
+.cmp .t i{position:absolute;inset:0 auto 0 0;border-radius:3px;background:var(--leak)}
+.cmp .t i.good{background:var(--violet)}
+.cmp .v{font-family:var(--mono);text-align:right}
+.notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
+.note{border:1.5px dashed var(--line);border-radius:14px;padding:16px 18px;background:var(--surface)}
+.note b{font-family:var(--display);font-size:18px}
+.note p{margin:6px 0 0;font-size:15.5px}
+
+.plan{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.phase{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.phase .when{font-family:var(--mono);font-size:12px;color:var(--violet);font-weight:600}
+.phase h3{font-size:20px;margin:4px 0 8px}
+.phase ul{margin:0;padding-left:18px;font-size:15px}
+.phase li{margin:6px 0}
+.run{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center;background:var(--ink);color:var(--bg);border-radius:16px;padding:24px}
+.run h3{font-size:26px}
+.run p{opacity:.8;margin:6px 0 10px;font-size:15px}
+.run pre{margin:0;border:1px solid color-mix(in srgb,var(--bg) 30%,transparent);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--mono);font-size:13px}
+.run a{color:var(--bg);border:1.5px solid var(--bg);border-radius:999px;padding:10px 16px;text-decoration:none;font-family:var(--mono);font-size:14px;white-space:nowrap}
+.src{font-size:13.5px;color:var(--muted)}
+.src li{margin:3px 0}
+footer{margin-top:28px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+@media (max-width:860px){.facts{grid-template-columns:1fr 1fr}.cols,.find,.notes,.plan{grid-template-columns:1fr}.run{grid-template-columns:1fr}}
+@media (max-width:520px){.facts{grid-template-columns:1fr}.ch,.cmp .r{grid-template-columns:96px minmax(0,1fr) 54px}}
+@media (prefers-reduced-motion:no-preference){.fill{transition:width .45s ease}.ghost{transition:left .45s ease}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="strip"><span>Role <b>Marketing Analyst</b></span><span>Company <b>Clay, New York</b></span><span>Candidate <b>S. A. Basharat Ali</b></span><span>October 2026</span></div>
+
+  <header class="hero">
+    <h1>Clay's funnel is an assembly line. Here's <span>where it leaks.</span></h1>
+    <p class="lede">A data scientist's read of how Clay markets and sells, and a working model of a funnel shaped like Clay's: a free plan, unlimited seats, usage metered in Actions, and growth driven by creators, agencies and community.</p>
+    <div class="links"><span>sabasharat.ali@gmail.com</span><a href="https://basharat.net">basharat.net</a><a href="https://github.com/sa-basharat-ali/plg-funnel-diagnostics">code on GitHub</a></div>
+  </header>
+
+  <div class="line" aria-label="Funnel stations with leaks">
+    <div class="stations">
+      <div class="st"><div class="dot">1</div><h3>Signup</h3><div class="n">12,890</div></div>
+      <div class="st"><div class="dot">2</div><h3>Workspace</h3><div class="n">6,390</div><div class="drip"><b>14</b>signups for the median enterprise</div></div>
+      <div class="st"><div class="dot">3</div><h3>Company</h3><div class="n">3,000</div><div class="drip"><b>2,068</b>personal emails sent to nurture; 1,571 resolvable</div></div>
+      <div class="st"><div class="dot">4</div><h3>Usage</h3><div class="n">Actions, 14 days</div><div class="drip"><b>17</b>accounts over the bar in total, under it per workspace</div></div>
+      <div class="st"><div class="dot">5</div><h3>Routing</h3><div class="n">one state each</div><div class="drip"><b>1,490</b>signups land in no state (unmapped form)</div></div>
+      <div class="st"><div class="dot">6</div><h3>Paid</h3><div class="n">19.4% of companies</div></div>
+    </div>
+    <p class="line-cap">Synthetic world built from public information. No real Clay data. Numbers are from <code>python3 run.py</code>.</p>
+  </div>
+
+  <section aria-labelledby="r1">
+    <div class="kicker">Research</div>
+    <h2 id="r1">What Clay is doing in market</h2>
+    <div class="facts">
+      <div class="fact"><b>$7.1B</b><span>Series D, $115M led by Wellington, Sept 2026</span></div>
+      <div class="fact"><b>~$200M</b><span>annualized revenue this quarter</span></div>
+      <div class="fact"><b>60 / 40</b><span>reported split, self-serve vs sales-led revenue</span></div>
+      <div class="fact"><b>50%+</b><span>of pipeline traced to marketing</span></div>
+    </div>
+    <div class="cols">
+      <div class="card"><span class="tag">Ecosystem</span><h3>Creators, agencies, clubs</h3><p>100+ LinkedIn creators with affiliate links and paid boosts of their best posts, 125+ agencies building their businesses on Clay, 50+ Clay clubs and a 30k-member Slack.</p></div>
+      <div class="card"><span class="tag">Category</span><h3>The GTM Engineer</h3><p>Clay coined the job title, then built around it: the GTM Engineering course, a $1M scholarship fund and Sculpt, the GTM conference, on October 8.</p></div>
+      <div class="card"><span class="tag">Brand</span><h3>Stunts and billboards</h3><p>At INBOUND 2025: "Every artist has their medium, go-to-market has Clay," plus live activations built to get talked about.</p></div>
+      <div class="card"><span class="tag">Paid</span><h3>Clay Ads on Clay</h3><p>Clay's own write-up reports cost per lead falling from $250 to $25 using its Ads product on its own audiences.</p></div>
+      <div class="card"><span class="tag">Pricing</span><h3>Free plan, Actions, unlimited seats</h3><p>March 2026 moved to Free, Launch and Growth with Actions metering. Clay's memo called it intentionally revenue and profit negative in the near term.</p></div>
+      <div class="card"><span class="tag">Product</span><h3>Templates and agents</h3><p>Claybooks and templates feed SEO and activation; Sculpt is set to show what Clay calls agentic GTM.</p></div>
+    </div>
+    <div class="tension"><strong>The tension this role sits in.</strong> The channels that grow Clay fastest (creators, agencies, community, stunts) are the ones last-touch tracking can't see, and the March pricing change put the agencies who champion Clay under the most pressure. The posting asks for exactly this: own the funnel's health, find leaks and misroutes, and feed ground truth into attribution and goals.</div>
+  </section>
+
+  <section aria-labelledby="r2">
+    <div class="kicker">The can't-miss chart</div>
+    <h2 id="r2">Who gets credit depends on which ledger you read</h2>
+    <div class="attr">
+      <div class="attr-top">
+        <strong>Share of signups by channel</strong>
+        <div class="seg" role="group" aria-label="Attribution view">
+          <button type="button" data-v="truth" aria-pressed="true">Truth (simulated)</button>
+          <button type="button" data-v="lt" aria-pressed="false">Last-touch</button>
+          <button type="button" data-v="sr" aria-pressed="false">Self-report</button>
+        </div>
+      </div>
+      <div id="chs"></div>
+      <p class="attr-note" id="attrNote"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="r3">
+    <div class="kicker">Six findings</div>
+    <h2 id="r3">What a data scientist on the team would catch</h2>
+    <div class="find">
+      <article class="f"><div class="num">28.0% → 19.4%<small>signup-to-paid, per signup vs per company</small></div><h3>With unlimited seats, "lead" has three grains</h3><p>62% of companies have 2+ workspaces. Counting signups inflates conversion, and 17 accounts cross the usage bar in total while staying under it in every workspace, so per-workspace routing never sees them.</p><div class="act"><b>What I'd do:</b> report the funnel at signup, workspace and company grain, side by side, with the company as the unit for routing.</div></article>
+      <article class="f"><div class="num good">42.1% vs 29.8%<small>paid rate, ranked by usage vs by the form</small></div><h3>Usage predicts buying better than the form</h3><div class="cmp"><div class="r"><span>14-day Actions</span><div class="t"><i class="good" style="width:100%"></i></div><span class="v">42.1%</span></div><div class="r"><span>"200+" on form</span><div class="t"><i style="width:70.8%"></i></div><span class="v">29.8%</span></div></div><p>The two lists overlap on 502 of 1,097 companies; the form misses 595 of the heaviest users.</p><div class="act"><b>What I'd do:</b> make Actions velocity the core of the product-qualified lead score, with the form as a tiebreaker.</div></article>
+      <article class="f"><div class="num">1,490<small>signups landing in no state</small></div><h3>One unmapped form drops leads silently</h3><p>Sales 4,121 + self-serve 5,449 + nurture 1,830 + nothing 1,490. Every missing one came from the template gallery form, 933 of them mid-market or enterprise.</p><div class="act"><b>What I'd do:</b> a daily reconciliation, signups in = signups routed, with an alert the day a new form or source ships unmapped.</div></article>
+      <article class="f"><div class="num">57.9%<small>of signups called "direct" by last-touch</small></div><h3>Last-touch can't see the ecosystem</h3><p>Agencies, community and events get 0%. Self-report fixes most of it but answers only 55.5% of the time and over-credits creators by 6.5 points, because LinkedIn ads get remembered as "LinkedIn".</p><div class="act"><b>What I'd do:</b> reconcile last-touch, self-report and affiliate links into one channel view, and say how sure each number is.</div></article>
+      <article class="f"><div class="num">+38.7% → +8.2%<small>stunt lift, pre/post vs control metros</small></div><h3>A stunt's naive lift is mostly the launch</h3><p>The stunt ran in 4 of 16 metros the same two weeks a product launch lifted everyone. Difference-in-differences recovers +8.2% against a true 10.0%.</p><div class="act"><b>What I'd do:</b> plan billboards and events with matched control metros so the next seven-figure bet has a defensible return.</div></article>
+      <article class="f"><div class="num">62.7%<small>of heavy agencies will exceed 40,000 Actions</small></div><h3>Which agencies hit the cap, and when you can tell</h3><div class="cmp"><div class="r"><span>Day 5 call</span><div class="t"><i class="good" style="width:76.8%"></i></div><span class="v">76.8%</span></div><div class="r"><span>Day 10 call</span><div class="t"><i class="good" style="width:83.2%"></i></div><span class="v">83.2%</span></div><div class="r"><span>Day 20 call</span><div class="t"><i class="good" style="width:92.7%"></i></div><span class="v">92.7%</span></div></div><div class="act"><b>What I'd do:</b> flag agencies by day 10 so customer success reaches them before the overage, not after.</div></article>
+    </div>
+    <div class="notes">
+      <div class="note"><b>What surprised me</b><p>I expected account-level routing to be the big win. It sent 158 more accounts to sales for 7 more paid companies in 60 days. The unmapped form and the usage score mattered far more.</p></div>
+      <div class="note"><b>The part I got wrong</b><p>My first version's self-report matched the truth almost exactly, because I had written it as the truth plus missing answers. Adding real recall mix-ups made it useful but biased, which is the argument for reconciling sources.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="r4">
+    <div class="kicker">First 90 days</div>
+    <h2 id="r4">What I'd do in the pod</h2>
+    <div class="plan">
+      <div class="phase"><div class="when">DAYS 1–30</div><h3>Count the assembly line</h3><ul><li>Reconcile every signup to one state, daily; find unmapped forms and sources.</li><li>Agree funnel stage definitions with Analytics Engineering and GTM Engineering.</li><li>Report the funnel at signup, workspace and company grain.</li></ul></div>
+      <div class="phase"><div class="when">DAYS 31–60</div><h3>Route on behavior</h3><ul><li>Build the Actions-velocity score; test it against the form-based rule.</li><li>Resolve personal-email signups to companies through shared workspaces.</li><li>Alert on routing drops and stalled stages in Hex or Sigma.</li></ul></div>
+      <div class="phase"><div class="when">DAYS 61–90</div><h3>Give credit honestly</h3><ul><li>One channel view from last-touch, self-report and affiliate links, with confidence.</li><li>Control-metro designs for the next events and billboards.</li><li>Day-10 agency cap alerts for customer success; hand ground truth to Strategic Finance.</li></ul></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="run">
+      <div><h3>Run it yourself</h3><p>Python standard library only, under a second.</p>
+<pre>git clone https://github.com/sa-basharat-ali/plg-funnel-diagnostics
+cd plg-funnel-diagnostics && python3 run.py</pre></div>
+      <a href="https://github.com/sa-basharat-ali/plg-funnel-diagnostics">View the code →</a>
+    </div>
+  </section>
+
+  <section aria-labelledby="r5">
+    <div class="kicker">Sources</div>
+    <h2 id="r5">Where the research comes from</h2>
+    <ul class="src">
+      <li>Clay Marketing Analyst posting (jobs.ashbyhq.com/claylabs) and Clay's Series D announcement, Sept 2026</li>
+      <li>Clay pricing pages and coverage of the March 2026 pricing change, including Clay's published pricing memo</li>
+      <li>Interviews and talks with Clay's marketing leadership (Exit Five, Ahrefs podcast, MKT1, Growth Talent)</li>
+      <li>Clay Creators program FAQ, Claybooks, Clay's "How Clay uses Clay Ads" post, Sculpt site, GTME scholarship page</li>
+      <li>HubSpot Scaling Smarter coverage of Clay's INBOUND 2025 billboards and activations</li>
+    </ul>
+    <footer>Independent work by Syed Ahmed Basharat Ali for the Marketing Analyst application. Not affiliated with Clay. All modeled data is synthetic.</footer>
+  </section>
+</div>
+<script>
+(function(){
+  var D=[["Creator",23.2,8.3,29.7],["Agency",9.3,0,6.5],["Community",13.0,0,12.7],["Search",16.7,21.7,16.8],["Paid ads",13.1,12.1,7.1],["Event",8.7,0,5.7],["Direct / word of mouth",16.1,57.9,21.7]];
+  var notes={truth:"What actually drove each signup in the simulation. The thin line marks the truth in every view.",
+    lt:"Last-touch puts 57.9% of signups in direct and gives agencies, community and events nothing.",
+    sr:"Self-report is close, but only 55.5% answer, creators look 6.5 points bigger and paid ads half their size."};
+  var idx={truth:1,lt:2,sr:3}, host=document.getElementById("chs"), max=60;
+  D.forEach(function(d){
+    var r=document.createElement("div"); r.className="ch";
+    r.innerHTML='<span class="nm">'+d[0]+'</span><div class="track"><div class="fill"></div><div class="ghost" style="left:'+(d[1]/max*100)+'%"></div></div><span class="val"></span>';
+    host.appendChild(r);
+  });
+  function show(v){
+    host.querySelectorAll(".ch").forEach(function(r,i){var x=D[i][idx[v]]; r.querySelector(".fill").style.width=(x/max*100)+"%"; r.querySelector(".val").textContent=x.toFixed(1)+"%";});
+    document.querySelectorAll(".seg button").forEach(function(b){b.setAttribute("aria-pressed",String(b.getAttribute("data-v")===v));});
+    document.getElementById("attrNote").textContent=notes[v];
+  }
+  document.querySelectorAll(".seg button").forEach(function(b){b.addEventListener("click",function(){show(b.getAttribute("data-v"));});});
+  show("truth");
+})();
+</script>
+</body>
+</html>
